@@ -12,29 +12,6 @@
                 data-action="header_search_on">
                 <i class="fa fa-fw fa-search"></i>
             </button>
-
-            <form class="d-none d-lg-inline-block me-1" action="be_pages_generic_search.html" method="POST">
-                <input type="text" class="form-control form-control-sm border-0 rounded-pill px-3"
-                    placeholder="Search..." id="page-header-search-input-full" name="page-header-search-input-full">
-            </form>
-
-            <div class="dropdown d-inline-block">
-                <button type="button" class="btn btn-alt-secondary" id="page-header-user-dropdown"
-                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa fa-fw fa-user"></i>
-                </button>
-                <div class="dropdown-menu dropdown-menu-end p-0" aria-labelledby="page-header-user-dropdown">
-                    <ul class="nav-items my-2">
-                        <li>
-                            <a class="d-flex text-dark py-2 px-3 align-items-center" href="{{ route('login') }}">
-                                <i class="fa fa-sign-in-alt me-2"></i>
-                                <span class="fs-sm">Login</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
         </div>
     </div>
 
