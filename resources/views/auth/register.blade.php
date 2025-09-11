@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-    <title>Pencatatan - Login</title>
+    <title>Pencatatan - Register</title>
 
     <meta name="description"
         content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework created by pixelcave and published on Themeforest">
@@ -48,15 +48,28 @@
 
                             <div class="row g-0 justify-content-center">
                                 <div class="col-sm-8 col-xl-6">
-                                    <form class="js-validation-signin" action="{{ route('doLogin') }}" method="POST"
-                                        onsubmit="submitPostLogin(event, $(this))">
+                                    <form class="js-validation-signin" action="{{ route('doRegister') }}" method="POST"
+                                        onsubmit="submitPostRegister(event, $(this))">
                                         @csrf
                                         <div class="py-3">
+                                            <div class="mb-4">
+                                                <input type="text"
+                                                    class="form-control form-control-lg form-control-alt" id="name"
+                                                    name="name" placeholder="Nama Lengkap">
+                                            </div>
+
+                                            <div class="mb-4">
+                                                <input type="text"
+                                                    class="form-control form-control-lg form-control-alt number-only"
+                                                    id="telp" name="telp" placeholder="Nomor Telepon">
+                                            </div>
+
                                             <div class="mb-4">
                                                 <input type="text"
                                                     class="form-control form-control-lg form-control-alt" id="email"
                                                     name="email" placeholder="Email">
                                             </div>
+
                                             <div class="mb-4">
                                                 <div class="input-group input-group-lg">
                                                     <input type="password" class="form-control form-control-alt"
@@ -67,45 +80,48 @@
                                                     </button>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="mb-4">
-                                            <button type="submit" id="btn_login"
-                                                class="btn w-100 btn-lg btn-hero btn-primary">
-                                                <i class="fa fa-fw fa-sign-in-alt opacity-50 me-1"></i> Login
-                                            </button>
-                                        </div>
-                                        <div class="text-center mb-3">
-                                            <p class="mb-0">
-                                                Belum punya akun?
-                                                <a href="{{ route('register') }}" class="fw-bold text-primary">Daftar
-                                                    sekarang</a>
-                                            </p>
-                                        </div>
 
-                                        <div class="text-center">
-                                            <a href="{{ route('landing') }}" class="text-muted">
-                                                <i class="fa fa-arrow-left me-1"></i> Kembali ke Halaman Utama
-                                            </a>
+                                            <div class="mb-4">
+                                                <button type="submit" id="btn_register"
+                                                    class="btn w-100 btn-lg btn-hero btn-primary">
+                                                    <i class="fa fa-fw fa-sign-in-alt opacity-50 me-1"></i> Register
+                                                </button>
+                                            </div>
                                         </div>
                                     </form>
+                                </div>
+
+                                <div class="text-center mb-3">
+                                    <p class="mb-0">
+                                        Sudah punya akun?
+                                        <a href="{{ route('login') }}" class="fw-bold text-primary">Login
+                                            sekarang</a>
+                                    </p>
+                                </div>
+
+                                <div class="text-center">
+                                    <a href="{{ route('landing') }}" class="text-muted">
+                                        <i class="fa fa-arrow-left me-1"></i> Kembali ke Halaman Utama
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div
-                        class="hero-static col-md-6 d-none d-md-flex align-items-md-center justify-content-md-center text-md-center">
-                        <div class="p-3">
-                            <p class="display-4 fw-bold text-white mb-3">
-                                Pencatatan Keuangan
-                            </p>
-                            <p class="fs-lg fw-semibold text-white-75 mb-0">
-                                Copyright &copy; <span data-toggle="year-copy"></span>
-                            </p>
-                        </div>
+                </div>
+                <div
+                    class="hero-static col-md-6 d-none d-md-flex align-items-md-center justify-content-md-center text-md-center">
+                    <div class="p-3">
+                        <p class="display-4 fw-bold text-white mb-3">
+                            Pencatatan Keuangan
+                        </p>
+                        <p class="fs-lg fw-semibold text-white-75 mb-0">
+                            Copyright &copy; <span data-toggle="year-copy"></span>
+                        </p>
                     </div>
                 </div>
             </div>
-        </main>
+    </div>
+    </main>
     </div>
 
     <script src="{{ asset('assets') }}/js/dashmix.app.min.js"></script>
@@ -137,29 +153,36 @@
             });
         });
 
-        function submitPostLogin(event, this_) {
-            event.preventDefault();
-            const email = $('#email').val();
-            const password = $('#password').val();
+        // $('.maskRupiah').maskMoney({
+        //     prefix: 'Rp. ',
+        //     thousands: '.',
+        //     decimal: ',',
+        //     precision: 0
+        // });
 
-            if (!email || !password) {
-                Dashmix.helpers('jq-notify', {
-                    type: 'warning',
-                    icon: 'fa fa-exclamation me-1',
-                    message: 'Email dan Password wajib diisi..'
-                });
-                return;
+        $('.number-only').keypress(function(e) {
+            var txt = String.fromCharCode(e.which);
+            if (!txt.match(/[0-9.,]/)) {
+                return false;
             }
+        });
+
+        function submitPostRegister(event, this_) {
+            event.preventDefault();
+
+            // reset error
+            $(".is-invalid").removeClass("is-invalid");
+            $(".invalid-feedback").remove();
 
             $.ajax({
-                url: "{{ route('doLogin') }}",
+                url: this_.attr('action'),
                 type: this_.attr('method'),
+                data: this_.serialize(),
                 beforeSend: () => {
-                    $("#btn_login").prop("disabled", true).html(
+                    $("#btn_register").prop("disabled", true).html(
                         "<div class='spinner-border spinner-border-sm text-primary' role='status'></div> Loading ..."
                     );
                 },
-                data: this_.serialize(),
                 success: (response) => {
                     Dashmix.helpers('jq-notify', {
                         type: 'success',
@@ -168,17 +191,38 @@
                     });
                     window.location.href = response['route'];
                 },
-                error: ({
-                    responseText
-                }) => {
-                    Dashmix.helpers('jq-notify', {
-                        type: 'danger',
-                        icon: 'fa fa-times me-1',
-                        message: responseText
-                    });
+                error: (xhr) => {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+
+                        $.each(errors, function(key, messages) {
+                            let input = $(`[name="${key}"]`);
+                            if (input.length) {
+                                input.addClass("is-invalid");
+
+                                // khusus untuk input-group (password)
+                                if (input.closest(".input-group").length) {
+                                    input.closest(".input-group")
+                                        .after(
+                                            `<div class="invalid-feedback d-block">${messages[0]}</div>`
+                                        );
+                                } else {
+                                    input.after(`<div class="invalid-feedback">${messages[0]}</div>`);
+                                }
+                            }
+                        });
+                    } else {
+                        Dashmix.helpers('jq-notify', {
+                            type: 'danger',
+                            icon: 'fa fa-times me-1',
+                            message: xhr.responseText
+                        });
+                    }
                 },
                 complete: () => {
-                    $("#btn_login").prop("disabled", false).html('Sign In');
+                    $("#btn_register").prop("disabled", false).html(
+                        '<i class="fa fa-fw fa-sign-in-alt opacity-50 me-1"></i> Register'
+                    );
                 }
             });
         }
