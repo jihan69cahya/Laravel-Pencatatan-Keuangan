@@ -98,11 +98,21 @@ class TransaksiController extends Controller
     public function tambahData(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'tanggal'      => 'required|date',
-            'tipe'         => 'required|in:MASUK,KELUAR,SALDO AWAL',
-            'nominal'      => 'required|min:1',
-            'keterangan'   => 'nullable|string',
+            'tanggal'    => 'required|date',
+            'tipe'       => 'required|in:MASUK,KELUAR,SALDO AWAL',
+            'nominal'    => 'required|min:1',
+            'keterangan' => 'nullable|string',
         ]);
+
+        $validator->after(function ($validator) use ($request) {
+            if ($request->tipe === 'KELUAR') {
+                $nominal = CustomHelper::rupiahToString($request->nominal);
+                $saldo = Transaksi::saldo();
+                if ($nominal > $saldo) {
+                    $validator->errors()->add('nominal', 'Saldo tidak cukup untuk transaksi pengeluaran.');
+                }
+            }
+        });
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()]);
@@ -112,10 +122,10 @@ class TransaksiController extends Controller
             DB::beginTransaction();
 
             Transaksi::create([
-                'tanggal' => $request->tanggal,
-                'users_id' => Auth::user()->id,
-                'tipe' => $request->tipe,
-                'nominal' => CustomHelper::rupiahToString($request->nominal),
+                'tanggal'   => $request->tanggal,
+                'users_id'  => Auth::user()->id,
+                'tipe'      => $request->tipe,
+                'nominal'   => CustomHelper::rupiahToString($request->nominal),
                 'keterangan' => $request->keterangan,
             ]);
 
@@ -135,6 +145,22 @@ class TransaksiController extends Controller
             'nominal'      => 'required|min:1',
             'keterangan'   => 'nullable|string',
         ]);
+
+        $transaksi = Transaksi::find($id);
+
+        $validator->after(function ($validator) use ($request, $transaksi) {
+            if ($transaksi && $transaksi->tipe === 'KELUAR') {
+                $nominal = is_numeric($request->nominal)
+                    ? $request->nominal
+                    : CustomHelper::rupiahToString($request->nominal);
+
+                $saldo = Transaksi::saldo() + $transaksi->nominal;
+
+                if ($nominal > $saldo) {
+                    $validator->errors()->add('nominal', 'Saldo tidak cukup untuk transaksi pengeluaran.');
+                }
+            }
+        });
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()]);
