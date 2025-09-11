@@ -11,6 +11,7 @@
         content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework created by pixelcave and published on Themeforest">
     <meta name="author" content="pixelcave">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Open Graph Meta -->
     <meta property="og:title" content="Dashmix - Bootstrap 5 Admin Template &amp; UI Framework">
@@ -29,7 +30,18 @@
 
     <!-- Stylesheets -->
     <link rel="stylesheet" id="css-main" href="{{ asset('assets') }}/css/dashmix.min.css">
+    <!-- Page JS Plugins CSS -->
+    <link rel="stylesheet" href="{{ asset('assets') }}/js/plugins/datatables-bs5/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet"
+        href="{{ asset('assets') }}/js/plugins/datatables-buttons-bs5/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet"
+        href="{{ asset('assets') }}/js/plugins/datatables-responsive-bs5/css/responsive.bootstrap5.min.css">
+    <link rel="stylesheet"
+        href="{{ asset('assets') }}/js/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css">
+    <link rel="stylesheet" href="{{ asset('assets') }}/js/plugins/flatpickr/flatpickr.min.css">
     <!-- END Stylesheets -->
+
+
 </head>
 
 <body>
@@ -84,9 +96,42 @@
 
     <script src="{{ asset('assets') }}/js/plugins/bootstrap-notify/bootstrap-notify.min.js"></script>
 
+    <!-- Page JS Plugins -->
+    <script src="{{ asset('assets') }}/js/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/datatables-bs5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/datatables-responsive-bs5/js/responsive.bootstrap5.min.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/datatables-buttons/dataTables.buttons.min.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/datatables-buttons-bs5/js/buttons.bootstrap5.min.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/datatables-buttons-jszip/jszip.min.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/datatables-buttons-pdfmake/pdfmake.min.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/datatables-buttons-pdfmake/vfs_fonts.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/datatables-buttons/buttons.print.min.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/datatables-buttons/buttons.html5.min.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="{{ asset('assets') }}/js/plugins/flatpickr/flatpickr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-maskmoney/3.0.2/jquery.maskMoney.min.js"></script>
 
     <script>
+        Dashmix.helpersOnLoad(['js-flatpickr', 'jq-datepicker']);
+    </script>
+
+    <script>
+        $('.maskRupiah').maskMoney({
+            prefix: 'Rp. ',
+            thousands: '.',
+            decimal: ',',
+            precision: 0
+        });
+
+        $('.number-only').keypress(function(e) {
+            var txt = String.fromCharCode(e.which);
+            if (!txt.match(/[0-9.,]/)) {
+                return false;
+            }
+        });
+
         function confirm_logout() {
             Swal.fire({
                 title: 'Apakah anda yakin?',
@@ -101,6 +146,16 @@
                     window.location.href = "{{ route('logout') }}";
                 }
             })
+        }
+
+        function delete_error() {
+            $("[id^=error-]").hide();
+        }
+
+        function delete_form() {
+            $('#formData').find('input, select, textarea').each(function() {
+                $(this).val('').trigger('change');
+            });
         }
     </script>
     @yield('scripts')

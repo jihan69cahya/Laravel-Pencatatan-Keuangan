@@ -32,21 +32,23 @@
         <div class="content-side">
             <ul class="nav-main">
                 <li class="nav-main-item">
-                    <a class="nav-main-link active" href="{{ route('dashboard.' . Auth::user()->role) }}">
+                    <a class="nav-main-link {{ request()->routeIs('dashboard.*') ? 'active' : '' }}"
+                        href="{{ route('dashboard.' . Auth::user()->role) }}">
                         <i class="nav-main-link-icon fa fa-rocket"></i>
                         <span class="nav-main-link-name">Dashboard</span>
                     </a>
                 </li>
                 @if (Auth::user()->role == 'pengguna')
-                    <li class="nav-main-heading">Transaksi</li>
+                    <li class="nav-main-heading">Keuangan</li>
                     <li class="nav-main-item">
-                        <a class="nav-main-link" href="/pencatatan">
+                        <a class="nav-main-link {{ request()->routeIs('transaksi.*') ? 'active' : '' }}"
+                            href="{{ route('transaksi.index') }}">
                             <i class="nav-main-link-icon fa fa-money-bill-transfer"></i>
-                            <span class="nav-main-link-name">Pencatatan</span>
+                            <span class="nav-main-link-name">Transaksi</span>
                         </a>
                     </li>
                     <li class="nav-main-item">
-                        <a class="nav-main-link" href="/laporan">
+                        <a class="nav-main-link {{ request()->is('laporan*') ? 'active' : '' }}" href="/laporan">
                             <i class="nav-main-link-icon fa fa-file-lines"></i>
                             <span class="nav-main-link-name">Laporan</span>
                         </a>
@@ -54,13 +56,13 @@
                 @else
                     <li class="nav-main-heading">Data</li>
                     <li class="nav-main-item">
-                        <a class="nav-main-link" href="/pengguna">
+                        <a class="nav-main-link {{ request()->is('pengguna*') ? 'active' : '' }}" href="/pengguna">
                             <i class="nav-main-link-icon fa fa-person"></i>
                             <span class="nav-main-link-name">Pengguna</span>
                         </a>
                     </li>
                     <li class="nav-main-item">
-                        <a class="nav-main-link" href="/pengguna">
+                        <a class="nav-main-link {{ request()->is('transaksi*') ? 'active' : '' }}" href="/transaksi">
                             <i class="nav-main-link-icon fa fa-money-bill-transfer"></i>
                             <span class="nav-main-link-name">Transaksi Keuangan</span>
                         </a>
