@@ -163,9 +163,13 @@
                     $('#tanggal_selesai').val($('#tanggal_mulai').val());
                 }
             });
-
-            get_data();
+            get();
         });
+
+        function get() {
+            get_data();
+            get_data_saldo();
+        }
 
         function get_data_saldo() {
             $.ajax({
@@ -186,7 +190,6 @@
         }
 
         function get_data() {
-            get_data_saldo();
             let tanggal_mulai = $('#tanggal_mulai').val();
             let tanggal_selesai = $('#tanggal_selesai').val();
             let tipe = $('#tipe_filter').val();
@@ -368,14 +371,13 @@
                             icon: 'fa fa-check me-1',
                             message: response.success
                         });
-                        get_data();
+                        get();
                     } else if (response.error) {
                         Dashmix.helpers('jq-notify', {
                             type: 'danger',
                             icon: 'fa fa-times me-1',
                             message: response.error
                         });
-                        get_data();
                     }
                     $("#btn_tambah").prop("disabled", false).text("Simpan");
                 },
@@ -418,7 +420,7 @@
                             icon: 'fa fa-check me-1',
                             message: response.success
                         });
-                        get_data();
+                        get();
                     } else if (response.error) {
                         $("#modal").modal("hide");
                         Dashmix.helpers('jq-notify', {
@@ -426,7 +428,6 @@
                             icon: 'fa fa-times me-1',
                             message: response.error
                         });
-                        get_data();
                     }
                     $("#btn_edit").prop("disabled", false).text("Simpan");
                 },
@@ -466,14 +467,13 @@
                                     icon: 'fa fa-check me-1',
                                     message: response.success
                                 });
-                                get_data();
+                                get();
                             } else if (response.error) {
                                 Dashmix.helpers('jq-notify', {
                                     type: 'danger',
                                     icon: 'fa fa-times me-1',
                                     message: response.error
                                 });
-                                get_data();
                             }
                         },
                     });
