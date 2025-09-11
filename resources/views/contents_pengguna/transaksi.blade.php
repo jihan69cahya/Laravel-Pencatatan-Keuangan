@@ -311,6 +311,7 @@
         }
 
         function edit_transaksi(data) {
+            delete_error();
             $("#btn_tambah").hide();
             $("#btn_edit").show();
             $("#title_modal").text("Edit data transaksi");
