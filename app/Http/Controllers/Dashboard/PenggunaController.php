@@ -13,9 +13,10 @@ class PenggunaController extends Controller
 
     public function index()
     {
-        $data['masuk'] = Transaksi::whereIn('tipe', ['SALDO AWAL', 'MASUK'])->sum('nominal');
-        $data['keluar'] = Transaksi::where('tipe', 'KELUAR')->sum('nominal');
+        $data['masuk'] = Transaksi::whereIn('tipe', ['SALDO AWAL', 'MASUK'])->sum('nominal') ?? 0;
+        $data['keluar'] = Transaksi::where('tipe', 'KELUAR')->sum('nominal') ?? 0;
         $data['saldo'] = $data['masuk'] - $data['keluar'];
+
         $data['transaksi'] = Transaksi::whereDate('tanggal', '>=', Carbon::now()->subWeek())
             ->get();
 

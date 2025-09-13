@@ -112,10 +112,12 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">Tidak ada data transaksi</td>
+                                        <td class="text-center">-</td>
+                                        <td class="text-center">-</td>
+                                        <td class="text-center">-</td>
+                                        <td class="text-center">Tidak ada data transaksi</td>
                                     </tr>
                                 @endforelse
-
                             </tbody>
                         </table>
                     </div>
@@ -131,20 +133,25 @@
         $('#tabel').dataTable({
             responsive: true
         });
+        const pemasukanData = @json($data['chart']['pemasukan']);
+        const pengeluaranData = @json($data['chart']['pengeluaran']);
+        const labelsData = @json($data['chart']['labels']);
+
+        const isEmpty = pemasukanData.every(val => val === 0) && pengeluaranData.every(val => val === 0);
 
         const ctxBar = document.getElementById('chart-bar');
         new Chart(ctxBar, {
             type: 'bar',
             data: {
-                labels: @json($data['chart']['labels']),
+                labels: labelsData,
                 datasets: [{
                         label: 'Pemasukan',
-                        data: @json($data['chart']['pemasukan']),
+                        data: pemasukanData,
                         backgroundColor: '#4caf50'
                     },
                     {
                         label: 'Pengeluaran',
-                        data: @json($data['chart']['pengeluaran']),
+                        data: pengeluaranData,
                         backgroundColor: '#f44336'
                     }
                 ]
@@ -154,6 +161,13 @@
                 plugins: {
                     legend: {
                         position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Rp ' + context.raw.toLocaleString();
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -166,19 +180,27 @@
             }
         });
 
-
         const ctxPie = document.getElementById('chart-pie');
         new Chart(ctxPie, {
             type: 'pie',
             data: {
                 labels: ['Pemasukan', 'Pengeluaran'],
                 datasets: [{
-                    data: [@json($data['masuk']), @json($data['keluar'])],
+                    data: [@json($data['masuk'] ?? 0), @json($data['keluar'] ?? 0)],
                     backgroundColor: ['#2196f3', '#ff5722']
                 }]
             },
             options: {
-                responsive: true
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': Rp ' + context.raw.toLocaleString();
+                            }
+                        }
+                    }
+                }
             }
         });
     </script>
