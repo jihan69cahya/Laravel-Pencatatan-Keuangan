@@ -48,7 +48,8 @@
                         </a>
                     </li>
                     <li class="nav-main-item">
-                        <a class="nav-main-link {{ request()->is('laporan*') ? 'active' : '' }}" href="/laporan">
+                        <a class="nav-main-link {{ request()->is('laporan*') ? 'active' : '' }}"
+                            href="{{ route('laporan.index') }}">
                             <i class="nav-main-link-icon fa fa-file-lines"></i>
                             <span class="nav-main-link-name">Laporan</span>
                         </a>

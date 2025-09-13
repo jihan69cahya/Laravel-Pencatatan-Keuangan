@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard\AdminController;
 use App\Http\Controllers\Dashboard\PenggunaController;
+use App\Http\Controllers\Keuangan\LaporanController;
 use App\Http\Controllers\Keuangan\TransaksiController;
 use App\Http\Controllers\LandingController;
 use Illuminate\Support\Facades\Route;
@@ -31,5 +32,10 @@ Route::group(['middleware' => 'redirect.if.auth'], function () {
         Route::post('tambah_data', [TransaksiController::class, 'tambahData'])->name('tambah_data');
         Route::post('edit_data', [TransaksiController::class, 'editData'])->name('edit_data');
         Route::post('hapus_data', [TransaksiController::class, 'hapusData'])->name('hapus_data');
+    });
+
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('', [LaporanController::class, 'index'])->name('index');
+        Route::get('datatable', [LaporanController::class, 'datatable'])->name('datatable');
     });
 });
