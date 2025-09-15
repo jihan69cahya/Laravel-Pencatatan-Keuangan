@@ -8,13 +8,35 @@ use Illuminate\Http\Request;
 
 class TransaksiController extends Controller
 {
-    public function data()
+    public function data(Request $request)
     {
-        $data = Transaksi::orderBy('tanggal', 'ASC')->get();
+        $perPage = $request->get('per_page', 10);
+        $page    = $request->get('page', 1);
+
+        $saldoAwal = Transaksi::where('tanggal', '<', function ($query) use ($page, $perPage) {
+            $query->select('tanggal')
+                ->from('transaksis')
+                ->orderBy('tanggal', 'ASC')
+                ->skip(($page - 1) * $perPage)
+                ->take(1);
+        })
+            ->selectRaw("
+            COALESCE(SUM(
+                CASE 
+                    WHEN tipe = 'SALDO AWAL' THEN nominal
+                    WHEN tipe = 'MASUK' THEN nominal
+                    WHEN tipe = 'KELUAR' THEN -nominal
+                    ELSE 0
+                END
+            ), 0) as saldo
+        ")
+            ->value('saldo');
+
+        $saldo = $saldoAwal;
+
+        $data = Transaksi::orderBy('tanggal', 'ASC')->paginate($perPage);
 
         $rows = [];
-        $saldo = 0;
-
         foreach ($data as $trx) {
             $debit = 0;
             $kredit = 0;
@@ -39,6 +61,8 @@ class TransaksiController extends Controller
             ];
         }
 
-        return response()->json($rows, 200);
+        return response()->json([
+            'data' => $rows,
+        ], 200);
     }
 }
