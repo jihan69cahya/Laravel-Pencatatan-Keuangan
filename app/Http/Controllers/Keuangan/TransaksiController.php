@@ -37,7 +37,7 @@ class TransaksiController extends Controller
         $tanggal_selesai = $request->tanggal_selesai;
         $tipe = $request->tipe;
 
-        $data = Transaksi::orderBy('tanggal', 'DESC')
+        $data = Transaksi::orderBy('created_at', 'DESC')
             ->when($tipe, function ($query, $tipe) {
                 $query->where('tipe', $tipe);
             })
