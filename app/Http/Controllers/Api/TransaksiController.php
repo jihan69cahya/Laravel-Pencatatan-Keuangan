@@ -10,7 +10,7 @@ class TransaksiController extends Controller
 {
     public function data(Request $request)
     {
-        $perPage = $request->get('per_page', 20);
+        $perPage = $request->get('per_page', 10);
         $page    = $request->get('page', 1);
 
         $saldoAwal = Transaksi::where('tanggal', '<', function ($query) use ($page, $perPage) {
