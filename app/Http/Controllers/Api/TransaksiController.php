@@ -10,12 +10,12 @@ class TransaksiController extends Controller
 {
     public function data(Request $request)
     {
-        $perPage = $request->get('per_page', 10);
+        $perPage = $request->get('per_page', 20);
         $page    = $request->get('page', 1);
 
         $saldoAwal = Transaksi::where('tanggal', '<', function ($query) use ($page, $perPage) {
             $query->select('tanggal')
-                ->from('transaksi')
+                ->from('transaksis')
                 ->orderBy('tanggal', 'ASC')
                 ->skip(($page - 1) * $perPage)
                 ->take(1);
@@ -63,6 +63,12 @@ class TransaksiController extends Controller
 
         return response()->json([
             'data' => $rows,
+            'pagination' => [
+                'current_page' => $data->currentPage(),
+                'per_page'     => $data->perPage(),
+                'total'        => $data->total(),
+                'last_page'    => $data->lastPage(),
+            ]
         ], 200);
     }
 }
