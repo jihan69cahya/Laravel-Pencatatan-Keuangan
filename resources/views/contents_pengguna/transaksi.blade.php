@@ -299,7 +299,7 @@
                     let options = '<option value="">-- Pilih Tipe --</option>';
 
                     if (res == 0) {
-                        options += '';
+                        options += '<option value="SALDO AWAL">Saldo Awal</option>';
                     } else {
                         options += '<option value="MASUK">Pemasukan</option>';
                         options += '<option value="KELUAR">Pengeluaran</option>';
