@@ -4,10 +4,37 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TransaksiController extends Controller
 {
+
+    public function dataDashboard()
+    {
+        $pemasukan = Transaksi::whereIn('tipe', ['SALDO AWAL', 'MASUK'])->sum('nominal') ?? 0;
+        $pengeluaran = Transaksi::where('tipe', 'KELUAR')->sum('nominal') ?? 0;
+        $saldo = $pemasukan - $pengeluaran;
+
+        $year = Carbon::now()->year;
+
+        $transaksi = Transaksi::select(
+            DB::raw('MONTH(tanggal) as bulan'),
+            DB::raw('SUM(CASE WHEN tipe IN ("SALDO AWAL","MASUK") THEN nominal ELSE 0 END) as pemasukan'),
+            DB::raw('SUM(CASE WHEN tipe = "KELUAR" THEN nominal ELSE 0 END) as pengeluaran')
+        )
+            ->whereYear('tanggal', $year)
+            ->groupBy('bulan')
+            ->orderBy('bulan')
+            ->get();
+        return response()->json([
+            'pemasukan' => $pemasukan,
+            'pengeluaran' => $pengeluaran,
+            'saldo' => $saldo,
+            'transaksi' => $transaksi,
+        ], 200);
+    }
     public function data(Request $request)
     {
         $perPage = $request->get('per_page', 10);
