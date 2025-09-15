@@ -9,7 +9,8 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
 Route::post('/register', [AuthController::class, 'register'])->middleware('guest');
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/data-dashboard', [TransaksiController::class, 'dataDashboard']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/profile', [AuthController::class, 'profile']);
+    Route::get('/data-dashboard', [TransaksiController::class, 'dataDashboard']);
     Route::get('/data-transaksi', [TransaksiController::class, 'data']);
 });
