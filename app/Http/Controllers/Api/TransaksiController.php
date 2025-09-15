@@ -15,7 +15,7 @@ class TransaksiController extends Controller
 
         $saldoAwal = Transaksi::where('tanggal', '<', function ($query) use ($page, $perPage) {
             $query->select('tanggal')
-                ->from('transaksis')
+                ->from('transaksi')
                 ->orderBy('tanggal', 'ASC')
                 ->skip(($page - 1) * $perPage)
                 ->take(1);
