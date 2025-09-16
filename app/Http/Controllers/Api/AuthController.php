@@ -105,48 +105,34 @@ class AuthController extends Controller
         DB::beginTransaction();
 
         try {
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users,email,' . auth::user()->id,
-                'telp' => 'nullable|string|max:20',
-                'current_password' => 'nullable|required_with:new_password',
-                'new_password' => 'nullable|required_with:current_password|confirmed|min:8',
-                'new_password_confirmation' => 'nullable|required_with:new_password',
-            ], [
-                'name.required' => 'Nama lengkap harus diisi.',
-                'name.max' => 'Nama lengkap maksimal 255 karakter.',
-                'email.required' => 'Email harus diisi.',
-                'email.email' => 'Format email tidak valid.',
-                'email.unique' => 'Email sudah digunakan oleh pengguna lain.',
-                'telp.max' => 'Nomor telepon maksimal 20 karakter.',
-                'current_password.required_with' => 'Password saat ini harus diisi untuk mengubah password.',
-                'new_password.required_with' => 'Password baru harus diisi.',
-                'new_password.confirmed' => 'Konfirmasi password baru tidak sesuai.',
-                'new_password.min' => 'Password baru minimal 8 karakter.',
-                'new_password_confirmation.required_with' => 'Konfirmasi password baru harus diisi.',
-            ]);
-
             $id = auth::user()->id;
             $user = User::find($id);
 
-            if (!empty($validatedData['current_password'])) {
-                if (!Hash::check($validatedData['current_password'], $user->password)) {
+            if (!empty($request->current_password)) {
+                if (!Hash::check($request->current_password, $user->password)) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Password saat ini tidak sesuai.',
-                        'errors' => ['current_password' => ['Password saat ini tidak sesuai.']]
                     ], 422);
                 }
             }
 
+            $check_email = User::where('email', $request->email)->count();
+            if ($check_email > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email sudah digunakan anggota lain.',
+                ], 422);
+            }
+
             $updateData = [
-                'name' => $validatedData['name'],
-                'email' => $validatedData['email'],
-                'telp' => $validatedData['telp'] ?? null,
+                'name' => $request->name,
+                'email' => $request->email,
+                'telp' => $request->telp ?? null,
             ];
 
-            if (!empty($validatedData['new_password'])) {
-                $updateData['password'] = Hash::make($validatedData['new_password']);
+            if (!empty($request->new_password)) {
+                $updateData['password'] = Hash::make($request->new_password);
             }
 
             $user->name = $updateData['name'];
