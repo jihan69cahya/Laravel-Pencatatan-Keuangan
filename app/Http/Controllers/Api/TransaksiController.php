@@ -40,29 +40,9 @@ class TransaksiController extends Controller
     {
         $perPage = $request->get('per_page', 10);
         $page    = $request->get('page', 1);
+        $data = Transaksi::orderBy('tanggal', 'ASC')->get();
 
-        $query = Transaksi::orderBy('tanggal', 'ASC');
-
-        $skip = ($page - 1) * $perPage;
-
-        $saldoAwal = $query->clone()
-            ->take($skip)
-            ->selectRaw("
-            COALESCE(SUM(
-                CASE 
-                    WHEN tipe = 'SALDO AWAL' THEN nominal
-                    WHEN tipe = 'MASUK' THEN nominal
-                    WHEN tipe = 'KELUAR' THEN -nominal
-                    ELSE 0
-                END
-            ), 0) as saldo
-        ")
-            ->value('saldo');
-
-        $saldo = $saldoAwal;
-
-        $data = $query->skip($skip)->take($perPage)->get();
-
+        $saldo = 0;
         $rows = [];
         foreach ($data as $trx) {
             $debit = 0;
@@ -70,7 +50,7 @@ class TransaksiController extends Controller
 
             if ($trx->tipe == 'SALDO AWAL') {
                 $debit = $trx->nominal;
-                $saldo += $debit;
+                $saldo = $debit;
             } elseif ($trx->tipe == 'MASUK') {
                 $debit = $trx->nominal;
                 $saldo += $debit;
