@@ -41,13 +41,12 @@ class TransaksiController extends Controller
         $perPage = $request->get('per_page', 10);
         $page    = $request->get('page', 1);
 
-        $saldoAwal = Transaksi::where('tanggal', '<', function ($query) use ($page, $perPage) {
-            $query->select('tanggal')
-                ->from('transaksi')
-                ->orderBy('tanggal', 'ASC')
-                ->skip(($page - 1) * $perPage)
-                ->take(1);
-        })
+        $query = Transaksi::orderBy('tanggal', 'ASC');
+
+        $skip = ($page - 1) * $perPage;
+
+        $saldoAwal = $query->clone()
+            ->take($skip)
             ->selectRaw("
             COALESCE(SUM(
                 CASE 
@@ -62,7 +61,7 @@ class TransaksiController extends Controller
 
         $saldo = $saldoAwal;
 
-        $data = Transaksi::orderBy('tanggal', 'ASC')->paginate($perPage);
+        $data = $query->skip($skip)->take($perPage)->get();
 
         $rows = [];
         foreach ($data as $trx) {
@@ -71,7 +70,7 @@ class TransaksiController extends Controller
 
             if ($trx->tipe == 'SALDO AWAL') {
                 $debit = $trx->nominal;
-                $saldo = $debit;
+                $saldo += $debit;
             } elseif ($trx->tipe == 'MASUK') {
                 $debit = $trx->nominal;
                 $saldo += $debit;
@@ -91,16 +90,19 @@ class TransaksiController extends Controller
             ];
         }
 
+        $total = Transaksi::count();
+
         return response()->json([
             'data' => $rows,
             'pagination' => [
-                'current_page' => $data->currentPage(),
-                'per_page'     => $data->perPage(),
-                'total'        => $data->total(),
-                'last_page'    => $data->lastPage(),
+                'current_page' => $page,
+                'per_page'     => $perPage,
+                'total'        => $total,
+                'last_page'    => ceil($total / $perPage),
             ]
         ], 200);
     }
+
 
     public function cekSaldoAwal()
     {
