@@ -81,8 +81,9 @@ class TransaksiController extends Controller
             }
 
             $rows[] = [
+                'id'         => $trx->id,
                 'tanggal'    => $trx->tanggal,
-                'tipe'    => $trx->tipe,
+                'tipe'       => $trx->tipe,
                 'keterangan' => $trx->keterangan ?? '-',
                 'debit'      => $debit > 0 ? $debit : '-',
                 'kredit'     => $kredit > 0 ? $kredit : '-',
