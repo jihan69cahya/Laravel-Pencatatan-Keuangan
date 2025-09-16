@@ -138,119 +138,93 @@
             });
         }
 
-        function submitUpdateProfile(event, this_) {
+        function ajaxFormWithConfirm(event, this_, options) {
             event.preventDefault();
 
-            $(".is-invalid").removeClass("is-invalid");
-            $(".invalid-feedback").remove();
+            const {
+                confirmTitle = "Apakah Anda yakin?",
+                    confirmText = "",
+                    confirmButtonText = "Ya, Lanjutkan!",
+                    successTitle = "Berhasil!",
+                    btnSelector,
+                    btnText
+            } = options;
 
-            $.ajax({
-                url: this_.attr('action'),
-                type: this_.attr('method'),
-                data: this_.serialize(),
-                beforeSend: () => {
-                    $("#btn_edit_profile").prop("disabled", true).html(
-                        "<div class='spinner-border spinner-border-sm text-primary' role='status'></div> Loading ..."
-                    );
-                },
-                success: (response) => {
-                    Dashmix.helpers('jq-notify', {
-                        type: 'success',
-                        icon: 'fa fa-check me-1',
-                        message: response['message']
-                    });
-                    window.location.reload();
-                },
-                error: (xhr) => {
-                    if (xhr.status === 422) {
-                        let errors = xhr.responseJSON.errors;
+            Swal.fire({
+                title: confirmTitle,
+                text: confirmText,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: confirmButtonText,
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $(".is-invalid").removeClass("is-invalid");
+                    $(".invalid-feedback").remove();
 
-                        $.each(errors, function(key, messages) {
-                            let input = $(`[name="${key}"]`);
-                            if (input.length) {
-                                input.addClass("is-invalid");
-
-                                if (input.closest(".input-group").length) {
-                                    input.closest(".input-group")
-                                        .after(
-                                            `<div class="invalid-feedback d-block">${messages[0]}</div>`
-                                        );
-                                } else {
-                                    input.after(`<div class="invalid-feedback">${messages[0]}</div>`);
-                                }
+                    $.ajax({
+                        url: this_.attr('action'),
+                        type: this_.attr('method'),
+                        data: this_.serialize(),
+                        beforeSend: () => {
+                            if (btnSelector) {
+                                $(btnSelector).prop("disabled", true).html(
+                                    "<div class='spinner-border spinner-border-sm text-primary' role='status'></div> Loading ..."
+                                );
                             }
-                        });
-                    } else {
-                        Dashmix.helpers('jq-notify', {
-                            type: 'danger',
-                            icon: 'fa fa-times me-1',
-                            message: xhr.responseText
-                        });
-                    }
-                },
-                complete: () => {
-                    $("#btn_edit_profile").prop("disabled", false).html(
-                        '<i class="fa fa-check-circle opacity-50 me-1"></i> Update Profile'
-                    );
+                        },
+                        success: (response) => {
+                            Swal.fire(successTitle, response['message'], 'success')
+                                .then(() => window.location.reload());
+                        },
+                        error: (xhr) => {
+                            if (xhr.status === 422) {
+                                let errors = xhr.responseJSON.errors;
+                                $.each(errors, function(key, messages) {
+                                    let input = $(`[name="${key}"]`);
+                                    if (input.length) {
+                                        input.addClass("is-invalid");
+                                        if (input.closest(".input-group").length) {
+                                            input.closest(".input-group")
+                                                .after(
+                                                    `<div class="invalid-feedback d-block">${messages[0]}</div>`
+                                                );
+                                        } else {
+                                            input.after(
+                                                `<div class="invalid-feedback">${messages[0]}</div>`
+                                            );
+                                        }
+                                    }
+                                });
+                            } else {
+                                Swal.fire('Gagal!', xhr.responseText, 'error');
+                            }
+                        },
+                        complete: () => {
+                            if (btnSelector && btnText) {
+                                $(btnSelector).prop("disabled", false).html(btnText);
+                            }
+                        }
+                    });
                 }
             });
         }
 
+        function submitUpdateProfile(event, this_) {
+            ajaxFormWithConfirm(event, this_, {
+                confirmText: "Data profile akan diupdate!",
+                btnSelector: "#btn_edit_profile",
+                btnText: '<i class="fa fa-check-circle opacity-50 me-1"></i> Update Profile'
+            });
+        }
+
         function submitUpdatePassword(event, this_) {
-            event.preventDefault();
-
-            $(".is-invalid").removeClass("is-invalid");
-            $(".invalid-feedback").remove();
-
-            $.ajax({
-                url: this_.attr('action'),
-                type: this_.attr('method'),
-                data: this_.serialize(),
-                beforeSend: () => {
-                    $("#btn_edit_password").prop("disabled", true).html(
-                        "<div class='spinner-border spinner-border-sm text-primary' role='status'></div> Loading ..."
-                    );
-                },
-                success: (response) => {
-                    Dashmix.helpers('jq-notify', {
-                        type: 'success',
-                        icon: 'fa fa-check me-1',
-                        message: response['message']
-                    });
-                    window.location.reload();
-                },
-                error: (xhr) => {
-                    if (xhr.status === 422) {
-                        let errors = xhr.responseJSON.errors;
-
-                        $.each(errors, function(key, messages) {
-                            let input = $(`[name="${key}"]`);
-                            if (input.length) {
-                                input.addClass("is-invalid");
-
-                                if (input.closest(".input-group").length) {
-                                    input.closest(".input-group")
-                                        .after(
-                                            `<div class="invalid-feedback d-block">${messages[0]}</div>`
-                                        );
-                                } else {
-                                    input.after(`<div class="invalid-feedback">${messages[0]}</div>`);
-                                }
-                            }
-                        });
-                    } else {
-                        Dashmix.helpers('jq-notify', {
-                            type: 'danger',
-                            icon: 'fa fa-times me-1',
-                            message: xhr.responseText
-                        });
-                    }
-                },
-                complete: () => {
-                    $("#btn_edit_password").prop("disabled", false).html(
-                        '<i class="fa fa-check-circle opacity-50 me-1"></i> Update Password'
-                    );
-                }
+            ajaxFormWithConfirm(event, this_, {
+                confirmText: "Password akan diupdate!",
+                btnSelector: "#btn_edit_password",
+                btnText: '<i class="fa fa-check-circle opacity-50 me-1"></i> Update Password'
             });
         }
     </script>
