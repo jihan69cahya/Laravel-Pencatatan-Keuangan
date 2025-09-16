@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TransaksiController extends Controller
@@ -98,5 +99,52 @@ class TransaksiController extends Controller
                 'last_page'    => $data->lastPage(),
             ]
         ], 200);
+    }
+
+    public function cekSaldoAwal()
+    {
+        $saldo_awal = Transaksi::where('tipe', 'SALDO AWAL')->count();
+        return response()->json($saldo_awal, 200);
+    }
+
+    public function simpanTransaksi(Request $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            if ($request->id) {
+                $transaksi = Transaksi::findOrFail($request->id);
+                $transaksi->update([
+                    'tanggal' => $request->tanggal,
+                    'tipe' => $request->tipe,
+                    'nominal' => $request->nominal,
+                    'keterangan' => $request->keterangan,
+                ]);
+            } else {
+                $transaksi = Transaksi::create([
+                    'tanggal' => $request->tanggal,
+                    'users_id' => Auth::user()->id,
+                    'tipe' => $request->tipe,
+                    'nominal' => $request->nominal,
+                    'keterangan' => $request->keterangan,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Transaksi berhasil disimpan',
+                'data' => $transaksi
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menyimpan transaksi',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
