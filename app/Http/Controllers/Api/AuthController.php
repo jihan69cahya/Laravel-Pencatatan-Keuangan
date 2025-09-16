@@ -117,7 +117,7 @@ class AuthController extends Controller
                 }
             }
 
-            $check_email = User::where('email', $request->email)->count();
+            $check_email = User::where('email', $request->email)->where('id', '!=', $id)->count();
             if ($check_email > 0) {
                 return response()->json([
                     'success' => false,
