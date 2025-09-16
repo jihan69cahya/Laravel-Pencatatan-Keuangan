@@ -15,4 +15,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cek-saldo-awal', [TransaksiController::class, 'cekSaldoAwal']);
     Route::get('/data-transaksi', [TransaksiController::class, 'data']);
     Route::post('/simpan-transaksi', [TransaksiController::class, 'simpanTransaksi']);
+    Route::post('/hapus-transaksi', [TransaksiController::class, 'hapusTransaksi']);
 });

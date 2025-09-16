@@ -115,6 +115,19 @@ class TransaksiController extends Controller
         try {
             if ($request->id) {
                 $transaksi = Transaksi::findOrFail($request->id);
+
+                if ($transaksi && $transaksi->tipe === 'KELUAR') {
+                    $saldo = Transaksi::saldo() + $transaksi->nominal;
+
+                    if ($request->nominal > $saldo) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Saldo tidak cukup untuk transaksi pengeluaran',
+                            'error' => 'Saldo tidak cukup untuk transaksi pengeluaran'
+                        ], 500);
+                    }
+                }
+
                 $transaksi->update([
                     'tanggal' => $request->tanggal,
                     'tipe' => $request->tipe,
@@ -122,6 +135,17 @@ class TransaksiController extends Controller
                     'keterangan' => $request->keterangan,
                 ]);
             } else {
+                if ($request->tipe === 'KELUAR') {
+                    $saldo = Transaksi::saldo();
+                    if ($request->nominal > $saldo) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Saldo tidak cukup untuk transaksi pengeluaran',
+                            'error' => 'Saldo tidak cukup untuk transaksi pengeluaran'
+                        ], 500);
+                    }
+                }
+
                 $transaksi = Transaksi::create([
                     'tanggal' => $request->tanggal,
                     'users_id' => Auth::user()->id,
@@ -144,6 +168,23 @@ class TransaksiController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Gagal menyimpan transaksi',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function hapusTransaksi(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $transaksi = Transaksi::find($request->id);
+            $transaksi->delete();
+
+            DB::commit();
+            return response()->json(['success' => 'Berhasil menghapus transaksi'], 200);
+        } catch (\Exception $e) {
+            return response()->json([
                 'error' => $e->getMessage()
             ], 500);
         }
