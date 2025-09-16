@@ -39,20 +39,40 @@ class TransaksiController extends Controller
     public function data(Request $request)
     {
         $perPage = $request->get('per_page', 10);
-        $page    = 1;
+        $page    = $request->get('page', 1);
+        $offset  = ($page - 1) * $perPage;
 
-        $data = Transaksi::orderBy('tanggal', 'ASC')->paginate($perPage);
+        $saldoSebelumnya = DB::select("
+        SELECT COALESCE(SUM(
+            CASE 
+                WHEN tipe IN ('SALDO AWAL', 'MASUK') THEN nominal 
+                WHEN tipe = 'KELUAR' THEN -nominal 
+                ELSE 0 
+            END
+        ), 0) as saldo
+        FROM (
+            SELECT tipe, nominal 
+            FROM transaksis 
+            ORDER BY tanggal ASC 
+            LIMIT ?
+        ) t
+    ", [$offset]);
 
-        $saldo = 0;
+        $saldoAwal = $saldoSebelumnya[0]->saldo ?? 0;
+
+        $data = Transaksi::orderBy('tanggal', 'ASC')
+            ->skip($offset)
+            ->take($perPage)
+            ->get();
+
+        $saldo = $saldoAwal;
         $rows = [];
+
         foreach ($data as $trx) {
             $debit = 0;
             $kredit = 0;
 
-            if ($trx->tipe == 'SALDO AWAL') {
-                $debit = $trx->nominal;
-                $saldo = $debit;
-            } elseif ($trx->tipe == 'MASUK') {
+            if ($trx->tipe == 'SALDO AWAL' || $trx->tipe == 'MASUK') {
                 $debit = $trx->nominal;
                 $saldo += $debit;
             } elseif ($trx->tipe == 'KELUAR') {
