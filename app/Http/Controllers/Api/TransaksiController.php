@@ -40,7 +40,8 @@ class TransaksiController extends Controller
     {
         $perPage = $request->get('per_page', 10);
         $page    = $request->get('page', 1);
-        $data = Transaksi::orderBy('tanggal', 'ASC')->get();
+
+        $data = Transaksi::orderBy('tanggal', 'ASC')->paginate($perPage);
 
         $saldo = 0;
         $rows = [];
