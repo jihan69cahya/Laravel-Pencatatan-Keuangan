@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -98,5 +100,85 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function updateProfile(Request $request) {}
+    public function updateProfile(Request $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users,email,' . auth::user()->id,
+                'telp' => 'nullable|string|max:20',
+                'current_password' => 'nullable|required_with:new_password',
+                'new_password' => 'nullable|required_with:current_password|confirmed|min:8',
+                'new_password_confirmation' => 'nullable|required_with:new_password',
+            ], [
+                'name.required' => 'Nama lengkap harus diisi.',
+                'name.max' => 'Nama lengkap maksimal 255 karakter.',
+                'email.required' => 'Email harus diisi.',
+                'email.email' => 'Format email tidak valid.',
+                'email.unique' => 'Email sudah digunakan oleh pengguna lain.',
+                'telp.max' => 'Nomor telepon maksimal 20 karakter.',
+                'current_password.required_with' => 'Password saat ini harus diisi untuk mengubah password.',
+                'new_password.required_with' => 'Password baru harus diisi.',
+                'new_password.confirmed' => 'Konfirmasi password baru tidak sesuai.',
+                'new_password.min' => 'Password baru minimal 8 karakter.',
+                'new_password_confirmation.required_with' => 'Konfirmasi password baru harus diisi.',
+            ]);
+
+            $id = auth::user()->id;
+            $user = User::find($id);
+
+            if (!empty($validatedData['current_password'])) {
+                if (!Hash::check($validatedData['current_password'], $user->password)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Password saat ini tidak sesuai.',
+                        'errors' => ['current_password' => ['Password saat ini tidak sesuai.']]
+                    ], 422);
+                }
+            }
+
+            $updateData = [
+                'name' => $validatedData['name'],
+                'email' => $validatedData['email'],
+                'telp' => $validatedData['telp'] ?? null,
+            ];
+
+            if (!empty($validatedData['new_password'])) {
+                $updateData['password'] = Hash::make($validatedData['new_password']);
+            }
+
+            $user->name = $updateData['name'];
+            $user->email = $updateData['email'];
+            $user->telp = $updateData['telp'];
+
+            if (isset($updateData['password'])) {
+                $user->password = $updateData['password'];
+            }
+
+            $user->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile berhasil diperbarui',
+            ], 200);
+        } catch (ValidationException $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak valid',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui profile',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
