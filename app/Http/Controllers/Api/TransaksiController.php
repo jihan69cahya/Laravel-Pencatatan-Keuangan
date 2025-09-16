@@ -52,7 +52,7 @@ class TransaksiController extends Controller
         ), 0) as saldo
         FROM (
             SELECT tipe, nominal 
-            FROM transaksis 
+            FROM transaksi 
             ORDER BY tanggal ASC 
             LIMIT ?
         ) t
