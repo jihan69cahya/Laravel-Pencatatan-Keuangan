@@ -97,4 +97,6 @@ class AuthController extends Controller
             'data' => $data,
         ], 200);
     }
+
+    public function updateProfile(Request $request) {}
 }

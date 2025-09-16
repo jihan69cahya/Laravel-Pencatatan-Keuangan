@@ -11,6 +11,7 @@ Route::post('/register', [AuthController::class, 'register'])->middleware('guest
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']);
+    Route::post('/update-profile', [AuthController::class, 'updateProfile']);
     Route::get('/data-dashboard', [TransaksiController::class, 'dataDashboard']);
     Route::get('/cek-saldo-awal', [TransaksiController::class, 'cekSaldoAwal']);
     Route::get('/data-transaksi', [TransaksiController::class, 'data']);
