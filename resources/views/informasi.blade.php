@@ -282,24 +282,37 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         function downloadAndroidApp() {
-            if (confirm(
-                    'Anda akan mengunduh aplikasi Pencatatan Keuangan untuk Android.\n\nCatatan: Pastikan Anda mengizinkan instalasi dari sumber tidak dikenal di pengaturan Android Anda.\n\nLanjutkan download?'
-                )) {
-                const downloadLink = document.createElement('a');
-                downloadLink.href = '{{ asset('assets/apk/pencatatan.apk') }}';
-                downloadLink.download = 'pencatatan-keuangan.apk';
-                downloadLink.style.display = 'none';
+            Swal.fire({
+                title: 'Unduh Aplikasi Android?',
+                text: 'Anda akan mengunduh aplikasi Pencatatan Keuangan untuk Android.\n\nCatatan: Pastikan Anda mengizinkan instalasi dari sumber tidak dikenal di pengaturan Android Anda.',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = '{{ asset('assets/pencatatan-V1.apk') }}';
+                    downloadLink.download = 'pencatatan-keuangan-v1.apk';
+                    downloadLink.style.display = 'none';
 
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
 
-                setTimeout(function() {
-                    alert('Download dimulai! Silakan cek folder Download di perangkat Anda.');
-                }, 1000);
-            }
+                    Swal.fire({
+                        title: 'Download Dimulai!',
+                        text: 'Silakan cek folder Download di perangkat Anda.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            });
         }
     </script>
 @endsection
