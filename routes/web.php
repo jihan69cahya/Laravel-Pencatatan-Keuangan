@@ -6,6 +6,7 @@ use App\Http\Controllers\Dashboard\PenggunaController;
 use App\Http\Controllers\Keuangan\LaporanController;
 use App\Http\Controllers\Keuangan\TransaksiController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => 'redirect.if.logged.in'], function () {
@@ -19,6 +20,9 @@ Route::group(['middleware' => 'redirect.if.logged.in'], function () {
 
 Route::group(['middleware' => 'redirect.if.auth'], function () {
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('profile', [ProfileController::class, 'index'])->name('profile');
+    Route::post('edit_profile', [ProfileController::class, 'editProfile'])->name('edit_profile');
+    Route::post('edit_password', [ProfileController::class, 'editPassword'])->name('edit_password');
     Route::get('cek_saldo_awal', [TransaksiController::class, 'cekSaldoAwal'])->name('cek_saldo_awal');
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna');
