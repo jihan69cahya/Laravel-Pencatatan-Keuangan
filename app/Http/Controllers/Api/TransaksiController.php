@@ -53,14 +53,14 @@ class TransaksiController extends Controller
         FROM (
             SELECT tipe, nominal 
             FROM transaksi 
-            ORDER BY tanggal ASC 
+            ORDER BY created_at ASC 
             LIMIT ?
         ) t
     ", [$offset]);
 
         $saldoAwal = $saldoSebelumnya[0]->saldo ?? 0;
 
-        $data = Transaksi::orderBy('tanggal', 'ASC')
+        $data = Transaksi::orderBy('created_at', 'ASC')
             ->skip($offset)
             ->take($perPage)
             ->get();
