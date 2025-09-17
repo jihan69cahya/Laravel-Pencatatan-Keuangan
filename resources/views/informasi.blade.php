@@ -288,25 +288,21 @@
         function downloadAndroidApp() {
             Swal.fire({
                 title: 'Unduh Aplikasi Android?',
-                text: 'Anda akan mengunduh aplikasi Pencatatan Keuangan untuk Android.\n\nCatatan: Pastikan Anda mengizinkan instalasi dari sumber tidak dikenal di pengaturan Android Anda.',
+                text: 'Anda akan diarahkan ke Google Drive untuk mengunduh aplikasi Pencatatan Keuangan.\n\nCatatan: Pastikan Anda mengizinkan instalasi dari sumber tidak dikenal di pengaturan Android Anda.',
                 icon: 'info',
                 showCancelButton: true,
                 confirmButtonText: 'Lanjutkan',
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = '{{ asset('assets/pencatatan-V1.apk') }}';
-                    downloadLink.download = 'pencatatan-keuangan-v1.apk';
-                    downloadLink.style.display = 'none';
-
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
+                    window.open(
+                        'https://drive.google.com/drive/folders/1M6cJH2b-hga1BSy5HAwjTFVAzwzaIQ6f?usp=sharing',
+                        '_blank'
+                    );
 
                     Swal.fire({
-                        title: 'Download Dimulai!',
-                        text: 'Silakan cek folder Download di perangkat Anda.',
+                        title: 'Menuju Google Drive!',
+                        text: 'Silakan unduh file APK dari folder Drive.',
                         icon: 'success',
                         timer: 2000,
                         showConfirmButton: false
