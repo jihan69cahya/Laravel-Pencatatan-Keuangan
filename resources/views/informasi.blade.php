@@ -268,10 +268,11 @@
                     <div class="row justify-content-center">
                         <div class="col-md-6">
                             <div class="btn-group w-100" role="group">
-                                <a href="mailto:support@financialapp.com" class="btn btn-outline-primary">
+                                <a href="mailto:jihancahyafirmana@gmail.com" class="btn btn-outline-primary">
                                     <i class="fa fa-envelope me-2"></i>Email Support
                                 </a>
-                                <a href="https://wa.me/1234567890" class="btn btn-outline-success" target="_blank">
+                                <a href="https://wa.me/62895414580242?text=Halo%20saya%20ingin%20bertanya..."
+                                    class="btn btn-outline-success" target="_blank">
                                     <i class="fab fa-whatsapp me-2"></i>WhatsApp
                                 </a>
                             </div>
