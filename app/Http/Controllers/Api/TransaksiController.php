@@ -38,68 +38,51 @@ class TransaksiController extends Controller
     }
     public function data(Request $request)
     {
-        $perPage = $request->get('per_page', 10);
-        $page    = $request->get('page', 1);
-        $offset  = ($page - 1) * $perPage;
+        $perPage = (int) $request->get('per_page', 10);
+        $perPage = $perPage > 0 ? $perPage : 10;
+        $page = max(1, (int) $request->get('page', 1));
+        $offset = ($page - 1) * $perPage;
 
-        $cutoff = Transaksi::orderBy('tanggal', 'ASC')
-            ->orderBy('created_at', 'ASC')
-            ->skip($offset)
-            ->take(1)
-            ->first();
-
-        $saldoAwal = 0;
-
-        if ($cutoff) {
-            $saldoAwal = DB::table('transaksi')
-                ->where(function ($q) {
-                    $q->where('tipe', 'SALDO AWAL')
-                        ->orWhere('tipe', 'MASUK')
-                        ->orWhere('tipe', 'KELUAR');
-                })
-                ->where(function ($q) use ($cutoff) {
-                    $q->where('tanggal', '<', $cutoff->tanggal)
-                        ->orWhere(function ($q2) use ($cutoff) {
-                            $q2->where('tanggal', $cutoff->tanggal)
-                                ->where('created_at', '<', $cutoff->created_at);
-                        });
-                })
-                ->selectRaw("COALESCE(SUM(CASE 
-                            WHEN tipe IN ('SALDO AWAL','MASUK') THEN nominal
-                            WHEN tipe = 'KELUAR' THEN -nominal
-                            ELSE 0 END),0) as saldo")
-                ->value('saldo');
-        }
-
-        $data = Transaksi::orderBy('tanggal', 'ASC')
-            ->orderBy('created_at', 'ASC')
+        $data = Transaksi::orderBy('created_at', 'ASC')
+            ->orderBy('id', 'ASC')
             ->skip($offset)
             ->take($perPage)
             ->get();
 
+        $saldoAwal = 0;
+        if ($offset > 0) {
+            $previous = Transaksi::orderBy('created_at', 'ASC')
+                ->orderBy('id', 'ASC')
+                ->take($offset)
+                ->get(['tipe', 'nominal']);
+
+            foreach ($previous as $p) {
+                $nominal = (float) $p->nominal;
+                if ($p->tipe === 'SALDO AWAL' || $p->tipe === 'MASUK') {
+                    $saldoAwal += $nominal;
+                } elseif ($p->tipe === 'KELUAR') {
+                    $saldoAwal -= $nominal;
+                }
+            }
+        }
+
         $saldo = $saldoAwal;
         $rows = [];
-
         foreach ($data as $trx) {
-            $debit = 0;
-            $kredit = 0;
+            $debit = ($trx->tipe === 'SALDO AWAL' || $trx->tipe === 'MASUK') ? (float) $trx->nominal : 0;
+            $kredit = ($trx->tipe === 'KELUAR') ? (float) $trx->nominal : 0;
 
-            if ($trx->tipe == 'SALDO AWAL' || $trx->tipe == 'MASUK') {
-                $debit = $trx->nominal;
-                $saldo += $debit;
-            } elseif ($trx->tipe == 'KELUAR') {
-                $kredit = $trx->nominal;
-                $saldo -= $kredit;
-            }
+            $saldo += $debit;
+            $saldo -= $kredit;
 
             $rows[] = [
-                'id'         => $trx->id,
-                'tanggal'    => $trx->tanggal,
-                'tipe'       => $trx->tipe,
+                'id' => $trx->id,
+                'tanggal' => $trx->tanggal,
+                'tipe' => $trx->tipe,
                 'keterangan' => $trx->keterangan ?? '-',
-                'debit'      => $debit > 0 ? $debit : '-',
-                'kredit'     => $kredit > 0 ? $kredit : '-',
-                'saldo'      => $saldo,
+                'debit' => $debit > 0 ? $debit : '-',
+                'kredit' => $kredit > 0 ? $kredit : '-',
+                'saldo' => $saldo,
             ];
         }
 
@@ -109,12 +92,14 @@ class TransaksiController extends Controller
             'data' => $rows,
             'pagination' => [
                 'current_page' => $page,
-                'per_page'     => $perPage,
-                'total'        => $total,
-                'last_page'    => ceil($total / $perPage),
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => (int) ceil($total / $perPage),
             ]
         ], 200);
     }
+
+
 
     public function cekSaldoAwal()
     {
