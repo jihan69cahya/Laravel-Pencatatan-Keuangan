@@ -42,23 +42,34 @@ class TransaksiController extends Controller
         $page    = $request->get('page', 1);
         $offset  = ($page - 1) * $perPage;
 
-        $saldoSebelumnya = DB::select("
-                        SELECT COALESCE(SUM(
-                            CASE 
-                                WHEN tipe IN ('SALDO AWAL', 'MASUK') THEN nominal 
-                                WHEN tipe = 'KELUAR' THEN -nominal 
-                                ELSE 0 
-                            END
-                        ), 0) as saldo
-                        FROM (
-                            SELECT tipe, nominal
-                            FROM transaksi
-                            ORDER BY tanggal ASC, created_at ASC
-                            LIMIT ?
-                        ) AS t
-                    ", [$offset]);
+        $cutoff = Transaksi::orderBy('tanggal', 'ASC')
+            ->orderBy('created_at', 'ASC')
+            ->skip($offset)
+            ->take(1)
+            ->first();
 
-        $saldoAwal = $saldoSebelumnya[0]->saldo ?? 0;
+        $saldoAwal = 0;
+
+        if ($cutoff) {
+            $saldoAwal = DB::table('transaksi')
+                ->where(function ($q) {
+                    $q->where('tipe', 'SALDO AWAL')
+                        ->orWhere('tipe', 'MASUK')
+                        ->orWhere('tipe', 'KELUAR');
+                })
+                ->where(function ($q) use ($cutoff) {
+                    $q->where('tanggal', '<', $cutoff->tanggal)
+                        ->orWhere(function ($q2) use ($cutoff) {
+                            $q2->where('tanggal', $cutoff->tanggal)
+                                ->where('created_at', '<', $cutoff->created_at);
+                        });
+                })
+                ->selectRaw("COALESCE(SUM(CASE 
+                            WHEN tipe IN ('SALDO AWAL','MASUK') THEN nominal
+                            WHEN tipe = 'KELUAR' THEN -nominal
+                            ELSE 0 END),0) as saldo")
+                ->value('saldo');
+        }
 
         $data = Transaksi::orderBy('tanggal', 'ASC')
             ->orderBy('created_at', 'ASC')
