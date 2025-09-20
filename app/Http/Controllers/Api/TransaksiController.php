@@ -50,17 +50,15 @@ class TransaksiController extends Controller
                 ELSE 0 
             END
         ), 0) as saldo
-        FROM (
-            SELECT tipe, nominal 
-            FROM transaksi 
-            ORDER BY created_at ASC 
-            LIMIT ?
-        ) t
+        FROM transaksi
+        ORDER BY tanggal ASC, created_at ASC
+        LIMIT ?
     ", [$offset]);
 
         $saldoAwal = $saldoSebelumnya[0]->saldo ?? 0;
 
-        $data = Transaksi::orderBy('created_at', 'ASC')
+        $data = Transaksi::orderBy('tanggal', 'ASC')
+            ->orderBy('created_at', 'ASC')
             ->skip($offset)
             ->take($perPage)
             ->get();
@@ -103,7 +101,6 @@ class TransaksiController extends Controller
             ]
         ], 200);
     }
-
 
     public function cekSaldoAwal()
     {
