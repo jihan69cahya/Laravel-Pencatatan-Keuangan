@@ -163,6 +163,10 @@
                     $('#tanggal_selesai').val($('#tanggal_mulai').val());
                 }
             });
+            flatpickr("#tanggal", {
+                dateFormat: "Y-m-d",
+                minDate: "today"
+            });
             get();
         });
 
