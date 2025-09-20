@@ -99,7 +99,7 @@
                                     <div class="mb-2">
                                         <label class="form-label" for="tanggal">Tanggal</label>
                                         <input type="date" class="js-flatpickr form-control" id="tanggal"
-                                            name="tanggal" placeholder="Y-m-d">
+                                            name="tanggal" placeholder="Y-m-d" min="{{ date('Y-m-d') }}">
                                         <small class="text-danger ps-1" id="error-tanggal"></small>
                                     </div>
                                     <div class="mb-2">
