@@ -43,17 +43,20 @@ class TransaksiController extends Controller
         $offset  = ($page - 1) * $perPage;
 
         $saldoSebelumnya = DB::select("
-        SELECT COALESCE(SUM(
-            CASE 
-                WHEN tipe IN ('SALDO AWAL', 'MASUK') THEN nominal 
-                WHEN tipe = 'KELUAR' THEN -nominal 
-                ELSE 0 
-            END
-        ), 0) as saldo
-        FROM transaksi
-        ORDER BY tanggal ASC, created_at ASC
-        LIMIT ?
-    ", [$offset]);
+                        SELECT COALESCE(SUM(
+                            CASE 
+                                WHEN tipe IN ('SALDO AWAL', 'MASUK') THEN nominal 
+                                WHEN tipe = 'KELUAR' THEN -nominal 
+                                ELSE 0 
+                            END
+                        ), 0) as saldo
+                        FROM (
+                            SELECT tipe, nominal
+                            FROM transaksi
+                            ORDER BY tanggal ASC, created_at ASC
+                            LIMIT ?
+                        ) AS t
+                    ", [$offset]);
 
         $saldoAwal = $saldoSebelumnya[0]->saldo ?? 0;
 
